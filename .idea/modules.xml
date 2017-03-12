@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/TPDM_U2_Practica3.iml" filepath="$PROJECT_DIR$/TPDM_U2_Practica3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SpaceHeroes.iml" filepath="$PROJECT_DIR$/SpaceHeroes.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
