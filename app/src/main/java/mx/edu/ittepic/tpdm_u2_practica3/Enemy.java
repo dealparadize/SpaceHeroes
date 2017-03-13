@@ -10,6 +10,7 @@ import android.view.View;
 
 public class Enemy  {
     float x2,y2,x1,y1;
+    Bullet bullet ;
     boolean visible;
     public Enemy(int x1, int y1, int x2, int y2,boolean visible) {
         this.x2 = x2;
@@ -17,6 +18,7 @@ public class Enemy  {
         this.x1 = x1;
         this.y1 = y1;
         this.visible = visible;
+        bullet = null;
     }
 
 

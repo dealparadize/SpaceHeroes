@@ -9,12 +9,15 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 /**
  * Created by jorgearellano on 11/03/17.
  */
 
 public class Space extends View {
+    int numEnemy;
+    int lifes = 3;
     Nave nave;
     Enemy[][] enemies = new Enemy[3][7];
     CountDownTimer timer;
@@ -47,6 +50,7 @@ public class Space extends View {
                     bullet.x1+=15;
                     bullet.x2+=15;
                 }
+                moveBullets();
                 checkBullet();
                 invalidate();
             }
@@ -57,9 +61,59 @@ public class Space extends View {
             }
         };
         timer.start();
+
+        CountDownTimer timerBullets = new CountDownTimer(20000,2000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                Double temp = Math.random()*20;
+                numEnemy =  temp.intValue();
+
+                //Todos los enemigos pueden lanzar, hay que restringirlo a que solo los que esten vivos.
+                if(numEnemy<7){
+                    enemies[0][numEnemy].bullet = new Bullet(true);
+                    enemies[0][numEnemy].bullet.x1 = enemies[0][numEnemy].x1-20;
+                    enemies[0][numEnemy].bullet.y1 = enemies[0][numEnemy].y1-10;
+                    enemies[0][numEnemy].bullet.x2 = enemies[0][numEnemy].x1;
+                    enemies[0][numEnemy].bullet.y2 = enemies[0][numEnemy].y1;
+                }
+                else if(numEnemy<14){
+                    enemies[1][numEnemy-7].bullet = new Bullet(true);
+                    enemies[1][numEnemy-7].bullet.x1 = enemies[1][numEnemy-7].x1-20;
+                    enemies[1][numEnemy-7].bullet.y1 = enemies[1][numEnemy-7].y1-10;
+                    enemies[1][numEnemy-7].bullet.x2 = enemies[1][numEnemy-7].x1;
+                    enemies[1][numEnemy-7].bullet.y2 = enemies[1][numEnemy-7].y1;
+                }
+                else{
+                    enemies[2][numEnemy-14].bullet = new Bullet(true);
+                    enemies[2][numEnemy-14].bullet.x1 = enemies[2][numEnemy-14].x1-20;
+                    enemies[2][numEnemy-14].bullet.y1 = enemies[2][numEnemy-14].y1-10;
+                    enemies[2][numEnemy-14].bullet.x2 = enemies[2][numEnemy-14].x1;
+                    enemies[2][numEnemy-14].bullet.y2 = enemies[2][numEnemy-14].y1;
+                }
+                invalidate();
+            }
+
+            @Override
+            public void onFinish() {
+                start();
+            }
+        };
+        timerBullets.start();
+    }
+
+    private void moveBullets() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 7; j++) {
+                if(enemies[i][j].bullet!=null){
+                    enemies[i][j].bullet.x1-=15;
+                    enemies[i][j].bullet.x2-=15;
+                }
+            }
+        }
     }
 
     private void checkBullet() {
+        //Bala de la nave
         if(bullet.shoot) {
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 7; j++) {
@@ -73,6 +127,30 @@ public class Space extends View {
             }
             if (bullet.x2 > 1200) {
                 bullet.shoot = false;
+            }
+        }
+
+        //Balas enemigas
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 7; j++) {
+                if(enemies[i][j].bullet!=null){
+                    if(enemies[i][j].bullet.x1<=nave.rect3){
+                        float center = (nave.rect2+nave.rect4)/2;
+                        if(enemies[i][j].bullet.y1<center+15 && enemies[i][j].bullet.y1>center-15) {
+                            lifes--;
+                            enemies[i][j].bullet=null;
+                            Log.d("Final del juego","jijiji");
+                            if (lifes <= 0) {
+                                Toast.makeText(getContext(), "FINAAAAL", Toast.LENGTH_LONG);
+                            }
+                            return;
+                        }
+                    }
+                    else if(enemies[i][j].bullet.x1<10){
+                        enemies[i][j].bullet = null;
+                    }
+
+                }
             }
         }
     }
@@ -119,6 +197,18 @@ public class Space extends View {
             p.setColor(Color.MAGENTA);
             c.drawRect(bullet.x1,bullet.y1,bullet.x2,bullet.y2,p);
         }
+
+        for(int i = 0;i<3;i++){
+            for(int j = 0;j<7;j++){
+                Bullet temp = enemies[i][j].bullet;
+                if(temp!=null) {
+                    p.setColor(Color.MAGENTA);
+                    c.drawRect(temp.x1, temp.y1, temp.x2, temp.y2, p);
+
+                }
+            }
+        }
+
         checkBorder();
 
     }
