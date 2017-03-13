@@ -5,11 +5,14 @@ import android.content.Loader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /**
  * Created by jorgearellano on 11/03/17.
@@ -20,6 +23,7 @@ public class Space extends View {
     int lifes = 3;
     Nave nave;
     Enemy[][] enemies = new Enemy[3][7];
+    ArrayList<Star> stars = new ArrayList<Star>();
     CountDownTimer timer;
     boolean move = true;
     Bullet bullet = new Bullet(false);
@@ -70,25 +74,31 @@ public class Space extends View {
 
                 //Todos los enemigos pueden lanzar, hay que restringirlo a que solo los que esten vivos.
                 if(numEnemy<7){
-                    enemies[0][numEnemy].bullet = new Bullet(true);
-                    enemies[0][numEnemy].bullet.x1 = enemies[0][numEnemy].x1-20;
-                    enemies[0][numEnemy].bullet.y1 = enemies[0][numEnemy].y1-10;
-                    enemies[0][numEnemy].bullet.x2 = enemies[0][numEnemy].x1;
-                    enemies[0][numEnemy].bullet.y2 = enemies[0][numEnemy].y1;
+                    if(enemies[0][numEnemy].visible) {
+                        enemies[0][numEnemy].bullet = new Bullet(true);
+                        enemies[0][numEnemy].bullet.x1 = enemies[0][numEnemy].x1 - 20;
+                        enemies[0][numEnemy].bullet.y1 = enemies[0][numEnemy].y1 - 10;
+                        enemies[0][numEnemy].bullet.x2 = enemies[0][numEnemy].x1;
+                        enemies[0][numEnemy].bullet.y2 = enemies[0][numEnemy].y1;
+                    }
                 }
                 else if(numEnemy<14){
-                    enemies[1][numEnemy-7].bullet = new Bullet(true);
-                    enemies[1][numEnemy-7].bullet.x1 = enemies[1][numEnemy-7].x1-20;
-                    enemies[1][numEnemy-7].bullet.y1 = enemies[1][numEnemy-7].y1-10;
-                    enemies[1][numEnemy-7].bullet.x2 = enemies[1][numEnemy-7].x1;
-                    enemies[1][numEnemy-7].bullet.y2 = enemies[1][numEnemy-7].y1;
+                    if (enemies[0][numEnemy-7].visible) {
+                        enemies[1][numEnemy - 7].bullet = new Bullet(true);
+                        enemies[1][numEnemy - 7].bullet.x1 = enemies[1][numEnemy - 7].x1 - 20;
+                        enemies[1][numEnemy - 7].bullet.y1 = enemies[1][numEnemy - 7].y1 - 10;
+                        enemies[1][numEnemy - 7].bullet.x2 = enemies[1][numEnemy - 7].x1;
+                        enemies[1][numEnemy - 7].bullet.y2 = enemies[1][numEnemy - 7].y1;
+                    }
                 }
                 else{
-                    enemies[2][numEnemy-14].bullet = new Bullet(true);
-                    enemies[2][numEnemy-14].bullet.x1 = enemies[2][numEnemy-14].x1-20;
-                    enemies[2][numEnemy-14].bullet.y1 = enemies[2][numEnemy-14].y1-10;
-                    enemies[2][numEnemy-14].bullet.x2 = enemies[2][numEnemy-14].x1;
-                    enemies[2][numEnemy-14].bullet.y2 = enemies[2][numEnemy-14].y1;
+                    if(enemies[0][numEnemy-14].visible) {
+                        enemies[2][numEnemy - 14].bullet = new Bullet(true);
+                        enemies[2][numEnemy - 14].bullet.x1 = enemies[2][numEnemy - 14].x1 - 20;
+                        enemies[2][numEnemy - 14].bullet.y1 = enemies[2][numEnemy - 14].y1 - 10;
+                        enemies[2][numEnemy - 14].bullet.x2 = enemies[2][numEnemy - 14].x1;
+                        enemies[2][numEnemy - 14].bullet.y2 = enemies[2][numEnemy - 14].y1;
+                    }
                 }
                 invalidate();
             }
@@ -137,6 +147,8 @@ public class Space extends View {
                     if(enemies[i][j].bullet.x1<=nave.rect3){
                         float center = (nave.rect2+nave.rect4)/2;
                         if(enemies[i][j].bullet.y1<center+15 && enemies[i][j].bullet.y1>center-15) {
+                            MediaPlayer sound = MediaPlayer.create(getContext().getApplicationContext(),R.raw.weapon);
+                            sound.start();
                             lifes--;
                             enemies[i][j].bullet=null;
                             Log.d("Final del juego","jijiji");
@@ -163,6 +175,10 @@ public class Space extends View {
             }
         }
 
+        for(int i = 0;i<200;i++){
+            stars.add(new Star());
+        }
+
     }
 
 
@@ -170,16 +186,24 @@ public class Space extends View {
     protected void onDraw(Canvas c){
         Paint p = new Paint();
 
+        //Fondo negro
         p.setStyle(Paint.Style.FILL);
         p.setColor(Color.BLACK);
         c.drawRect(0,0,1500,2000,p);
 
-
+        //Nave
         p.setColor(Color.GREEN);
         c.drawRect(nave.rect1,nave.rect2,nave.rect3,nave.rect4,p);
         c.drawArc(nave.arc1,nave.arc2,nave.arc3,nave.arc4,0,360,true,p);
         //c.drawCircle(nave.rect3,nave.rect2+nave.rect4/2,50,p);
 
+        //Estrellas
+        for(int i = 0;i<stars.size();i++){
+            Double temp = Math.random()*255;
+
+            p.setColor(Color.argb(temp.intValue(),255,255,255));
+            c.drawCircle(stars.get(i).x1,stars.get(i).y1,stars.get(i).radius,p);
+        }
 
         for(int i = 0;i<3;i++){
             for(int j = 0;j<7;j++){
@@ -234,11 +258,20 @@ public class Space extends View {
                 shootBullet();
             }
         }
+        if(e.getAction()==MotionEvent.ACTION_MOVE){
+            nave.rect2=(int)e.getY();
+            nave.rect4=(int)e.getY()+50;
+            nave.arc2=(int)e.getY();
+            nave.arc4=(int)e.getY()+50;
+
+            }
         return true;
     }
 
     private void shootBullet() {
         if (!bullet.shoot) {
+            MediaPlayer sound = MediaPlayer.create(getContext().getApplicationContext(),R.raw.solo);
+            sound.start();
             bullet.x1 = (nave.arc1 + nave.arc3) / 2;
             bullet.y1 = (nave.arc2 + nave.arc4)/ 2;
             bullet.x2 = bullet.x1 + 20;
