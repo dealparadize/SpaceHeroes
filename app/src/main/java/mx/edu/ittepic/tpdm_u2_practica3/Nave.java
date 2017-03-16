@@ -8,6 +8,9 @@ public class Nave {
     int rect1,rect2,rect3,rect4;
     float arc1,arc2,arc3,arc4;
 
+    int lnX, lnY, lnX2, lnY2;
+    float prX, prY, prX2, prY2;
+    float _prX, _prY, _prX2, _prY2;
 
     public Nave(int rect1, int rect2, int rect3, int rect4,int arc1,int arc2,int arc3,int arc4) {
         this.rect1 = rect1;
@@ -18,6 +21,5 @@ public class Nave {
         this.arc2 = arc2;
         this.arc3 = arc3;
         this.arc4 = arc4;
-
     }
 }
